@@ -1,9 +1,8 @@
-export default class LoginUsecase{
-  
-    async auth(email, password){
-        return{
-            email,
-            password
-        }
+export default class LoginUsecase {
+  async auth (email, password) {
+    return {
+      email,
+      password
     }
+  }
 }

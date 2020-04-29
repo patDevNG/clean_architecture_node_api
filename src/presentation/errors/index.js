@@ -1,8 +1,7 @@
-import ServerError from './server_error';
-import UnauthorizedError from './unauthorized-error';
+import ServerError from './server_error'
+import UnauthorizedError from './unauthorized-error'
 
-module.exports= {
-    ServerError,
-    UnauthorizedError
+module.exports = {
+  ServerError,
+  UnauthorizedError
 }
-   
