@@ -15,7 +15,7 @@
 				"test1": "jest --colors --noStackTrace --passWithNoTests --runInBand",
 				"test:unit": "npm test -- --watch -c jest-unit-config.js",
 				"test:integration": "npm test -- --watch -c jest-integration-config.js",
-				"test:staged": "npm test -- --findRelatedTests --silent",
+				"test:staged": "npm test -- jest-unit-config.js",
 				"test:ci": "npm test -- --coverage --silent",
 				"test:coveralls": "npm run test:ci && coveralls < coverage/lcov.info"
 		},
