@@ -8,23 +8,21 @@ export default class LoginRouter {
   }
 
   async route (httpRequest) {
-   try{
-    const { email, password } = httpRequest.body
-    if (!email) {
-      return HttpResponse.badRequest('email')
+    try {
+      const { email, password } = httpRequest.body
+      if (!email) {
+        return HttpResponse.badRequest('email')
+      }
+      if (!password) {
+        return HttpResponse.badRequest('password')
+      }
+      const accessToken = this.authUseCase.auth(email, password)
+      if (!accessToken) {
+        return HttpResponse.unAuthorizedError()
+      }
+      return HttpResponse.ok(accessToken)
+    } catch (error) {
+      return HttpResponse.severError()
     }
-    if (!password) {
-      return HttpResponse.badRequest('password')
-    }
-    const accessToken = this.authUseCase.auth(email, password)
-    if (!accessToken) {
-      return HttpResponse.unAuthorizedError()
-    }
-    return HttpResponse.ok(accessToken)
   }
-  catch(error){
-    return HttpResponse.severError()
-  }
-  
-}
 }

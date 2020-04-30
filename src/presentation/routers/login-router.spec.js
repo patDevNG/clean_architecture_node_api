@@ -12,7 +12,7 @@ const makeSut = () => {
     authUseCaseSpy
   }
 }
-const makeAuthUseCaseSpy = ()=>{
+const makeAuthUseCaseSpy = () => {
   class AuthUseCaseSpy {
     auth (email, password) {
       this.email = email,
@@ -20,16 +20,16 @@ const makeAuthUseCaseSpy = ()=>{
       return this.accessToken
     }
   }
-  return new AuthUseCaseSpy();
+  return new AuthUseCaseSpy()
 }
 
-const makeAuthUseCaseSpyWithError = ()=>{
-  class AuthUseCaseSpy{
-    auth(){
+const makeAuthUseCaseSpyWithError = () => {
+  class AuthUseCaseSpy {
+    auth () {
       throw new Error()
     }
   }
-  return new AuthUseCaseSpy;
+  return new AuthUseCaseSpy()
 }
 
 describe('Login Router', () => {
@@ -62,14 +62,14 @@ describe('Login Router', () => {
     const { sut } = makeSut()
     const httpResponse = await sut.route()
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body).toEqual(new ServerError);
+    expect(httpResponse.body).toEqual(new ServerError())
   })
   test('Should return 500 if httpRequest has no body ', async () => {
     const { sut } = makeSut()
     const httpRequest = {}
     const httpResponse = await sut.route({})
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body).toEqual(new ServerError);
+    expect(httpResponse.body).toEqual(new ServerError())
   })
   test('Should call Authcase with correct params', async () => {
     const { sut, authUseCaseSpy } = makeSut()
@@ -110,10 +110,9 @@ describe('Login Router', () => {
     const httpResponse = await sut.route(httpRequest)
     console.log(httpResponse.statusCode)
     expect(httpResponse.statusCode).toBe(200)
-    console.log(httpResponse.body.accessToken);
-    
-    expect(httpResponse.body).toEqual(authUseCaseSpy.accessToken)
+    console.log(httpResponse.body.accessToken)
 
+    expect(httpResponse.body).toEqual(authUseCaseSpy.accessToken)
   })
 
   test('Should return 500 when no usecase is provided', async () => {
@@ -127,7 +126,7 @@ describe('Login Router', () => {
     const httpResponse = await sut.route(httpRequest)
     console.log(httpResponse.statusCode)
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body).toEqual(new ServerError);
+    expect(httpResponse.body).toEqual(new ServerError())
   })
   test('Should return 500 if Authusecase has no auth method', async () => {
     const sut = new LoginRouter({})
@@ -140,10 +139,10 @@ describe('Login Router', () => {
     const httpResponse = await sut.route(httpRequest)
     console.log(httpResponse.statusCode)
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body).toEqual(new ServerError);
+    expect(httpResponse.body).toEqual(new ServerError())
   })
   test('Should return 500 if Authusecase throws an error', async () => {
-    const authUseCaseSpy = makeAuthUseCaseSpyWithError();
+    const authUseCaseSpy = makeAuthUseCaseSpyWithError()
     authUseCaseSpy.accessToken = 'valid_token'
     const sut = new LoginRouter(authUseCaseSpy)
     const httpRequest = {
@@ -155,6 +154,6 @@ describe('Login Router', () => {
     const httpResponse = await sut.route(httpRequest)
     console.log(httpResponse.statusCode)
     expect(httpResponse.statusCode).toBe(500)
-    expect(httpResponse.body).toEqual(new ServerError);
+    expect(httpResponse.body).toEqual(new ServerError())
   })
 })
