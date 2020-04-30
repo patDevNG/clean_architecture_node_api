@@ -2,19 +2,42 @@ import MissingParamError from '../../util/error/missing_param'
 import LoginRouter from './login-router'
 import UnauthorizedError from '../errors/unauthorized-error'
 import ServerError from '../errors/server_error'
+import InvalidParamError from '../../util/error/invlaid_param'
 
 const makeSut = () => {
-  const authUseCaseSpy = makeAuthUseCaseSpy()
+  const authUseCaseSpy = makeAuthUseCaseSpy();
+  const emailValidatorSpy = makeEmailValidator()
   authUseCaseSpy.accessToken = 'valid_token'
-  const sut = new LoginRouter(authUseCaseSpy)
+  const sut = new LoginRouter(authUseCaseSpy, emailValidatorSpy)
   return {
     sut,
-    authUseCaseSpy
+    authUseCaseSpy,
+    emailValidatorSpy
   }
+}
+const makeEmailValidator = ()=>{
+  class EmailValidatorSpy{
+    isValid(email){
+      this.email = email
+      return this.isValidEmail
+    }
+  }
+  const emailValidatorSpy = new EmailValidatorSpy();
+  emailValidatorSpy.isValidEmail = true
+  return emailValidatorSpy;
+}
+
+const makeEmailValidatorWithError = () => {
+  class EmailValidator {
+ isValid () {
+      throw new Error()
+    }
+  }
+  return new EmailValidator()
 }
 const makeAuthUseCaseSpy = () => {
   class AuthUseCaseSpy {
-    auth (email, password) {
+    async auth (email, password) {
       this.email = email,
       this.password = password
       return this.accessToken
@@ -25,7 +48,7 @@ const makeAuthUseCaseSpy = () => {
 
 const makeAuthUseCaseSpyWithError = () => {
   class AuthUseCaseSpy {
-    auth () {
+   async auth () {
       throw new Error()
     }
   }
@@ -156,4 +179,75 @@ describe('Login Router', () => {
     expect(httpResponse.statusCode).toBe(500)
     expect(httpResponse.body).toEqual(new ServerError())
   })
+
+  test('Should return 400 if invalid email is provided', async () => {
+    const { sut , emailValidatorSpy} = makeSut()
+    emailValidatorSpy.isValidEmail = false
+    const httpRequest = {
+      body: {
+        email: 'invalid_emaila@email.com',
+        password:'any_password'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    expect(httpResponse.statusCode).toBe(400)
+    expect(httpResponse.body).toEqual(new InvalidParamError('email'))
+  })
+  test('Should return 500 when no emailValidator is provided', async () => {
+    const authUseCaseSpy = makeAuthUseCaseSpy()
+    const sut = new LoginRouter(authUseCaseSpy)
+    const httpRequest = {
+      body: {
+        email: 'any_email@email.com',
+        password: 'any_password'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    console.log(httpResponse.statusCode)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
+  })
+  test('Should return 500 if emailValidator has no isValid method', async () => {
+    const authUseCaseSpy = makeAuthUseCaseSpy()
+    const sut = new LoginRouter(authUseCaseSpy,{})
+    const httpRequest = {
+      body: {
+        email: 'any_email@email.com',
+        password: 'any_password'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    console.log(httpResponse.statusCode)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
+  })
+  test('Should return 500 if EmailValidator throws an error', async () => {
+    const authUseCaseSpy = makeAuthUseCaseSpy()
+    const emailValidatorSpy = makeEmailValidatorWithError()
+    const sut = new LoginRouter(authUseCaseSpy,emailValidatorSpy)
+    const httpRequest = {
+      body: {
+        email: 'any_email@email.com',
+        password: 'any_password'
+      }
+    }
+    const httpResponse = await sut.route(httpRequest)
+    console.log(httpResponse.statusCode)
+    expect(httpResponse.statusCode).toBe(500)
+    expect(httpResponse.body).toEqual(new ServerError())
+  })
+  test('Should call EmailValidator with correct email', async () => {
+    const { sut, emailValidatorSpy} = makeSut()
+    console.log(emailValidatorSpy.email)
+    const httpRequest = {
+      body: {
+        email: 'valid_email@email.com',
+        password: 'password'
+      }
+    }
+    await sut.route(httpRequest)
+    console.log(emailValidatorSpy.email)
+    expect(emailValidatorSpy.email).toBe(httpRequest.body.email)
+  })
+
 })
