@@ -8,9 +8,7 @@ export default class LoginRouter {
   }
 
   async route (httpRequest) {
-    if (!httpRequest || !httpRequest.body || !this.authUseCase || !this.authUseCase.auth) {
-      return HttpResponse.severError()
-    }
+   try{
     const { email, password } = httpRequest.body
     if (!email) {
       return HttpResponse.badRequest('email')
@@ -18,10 +16,15 @@ export default class LoginRouter {
     if (!password) {
       return HttpResponse.badRequest('password')
     }
-    const access_token = this.authUseCase.auth(email, password)
-    if (!access_token) {
+    const accessToken = this.authUseCase.auth(email, password)
+    if (!accessToken) {
       return HttpResponse.unAuthorizedError()
     }
-    return HttpResponse.ok()
+    return HttpResponse.ok(accessToken)
   }
+  catch(error){
+    return HttpResponse.severError()
+  }
+  
+}
 }

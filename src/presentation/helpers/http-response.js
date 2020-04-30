@@ -26,10 +26,10 @@ export default class HttpResponse {
     }
   }
 
-  static ok (body) {
+  static ok (data) {
     return {
       statusCode: 200,
-      body
+      body:data
     }
   }
 }
